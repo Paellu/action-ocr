@@ -2,7 +2,6 @@ const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const result = document.getElementById('result');
 const optionGrid = document.getElementById('option-grid');
-const emailGrid = document.getElementById('email-grid');
 const callBtn = document.getElementById('callBtn');
 const emailBtn = document.getElementById('emailBtn');
 const outputDiv = document.getElementById('output');
@@ -10,15 +9,17 @@ const prefixInput = document.getElementById('prefix');
 const suffixInput = document.getElementById('suffix');
 let numbers = '';
 
+// Function to format and set phone number
 function set_phone_number() {
   phoneNumber = numbers;
-  if (prefixInput.value) {
+  if (prefixInput.value && prefixInput.style.display !== 'none') {
     phoneNumber = prefixInput.value + phoneNumber;
   }
-  if (suffixInput.value) {
+  if (suffixInput.value && suffixInput.style.display !== 'none') {
     phoneNumber = phoneNumber + suffixInput.value;
   }
-  callBtn.textContent = `Call ${phoneNumber}`;
+  callBtn.style.display = 'inline-block';
+  callBtn.textContent = `Dial ${phoneNumber}`;
   callBtn.onclick = () => {
     window.location.href = `tel:${phoneNumber}`;
   };
@@ -35,8 +36,6 @@ suffixInput.addEventListener('input', () => {
 });
 
 // Access the device camera and stream to video element
-
-
 navigator.mediaDevices.getUserMedia({
   video: {
     facingMode: { ideal: 'environment' }
@@ -45,6 +44,7 @@ navigator.mediaDevices.getUserMedia({
   .then(stream => video.srcObject = stream)
   .catch(err => console.error("Camera access error:", err));
 
+// Capture frame and perform OCR
 function capture() {
   const ctx = canvas.getContext('2d');
   canvas.width = video.videoWidth;
@@ -65,29 +65,49 @@ function capture() {
   Tesseract.recognize(croppedCanvas, 'eng', {
     logger: m => console.log(m)
   }).then(({ data: { text } }) => {
-    const numberMatch = text.match(/\d+/g);
-    const textMatch = text.match(/\d+/g);
     const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
+    const textMatch = text.match(/[a-zA-Z]{2,}/g);
+    const numberMatch = text.match(/\d+/g);
+
     if (emailMatch && emailMatch.length > 0) {
+      emailBtn.style.display = 'inline-block';
       emailBtn.textContent = `Email ${emailMatch[0]}`;
       emailBtn.onclick = () => {
         window.location.href = `mailto:${emailMatch[0]}`;
       };
-      emailGrid.style.display = 'block ruby';
-    }
-    if (textMatch && textMatch.length > 0) {
-      console.log("Extracted text:", text);
     }
     if (numberMatch && numberMatch.length > 0) {
       numbers = numberMatch.join('');
-
-      optionGrid.style.display = 'block ruby';
-      prefixInput.value = localStorage.getItem('ocr_prefix') || '';
-      suffixInput.value = localStorage.getItem('ocr_suffix') || '';
-      set_phone_number();
-      result.textContent = numbers;
+      if (numbers.length == 7 || numbers.length == 10 || numbers.length == 11) {
+        result.textContent = `Phone number ${numbers}`;
+        prefixInput.style.display = 'none';
+        suffixInput.style.display = 'none';
+        localStorage.setItem('ocr_prefix', '');
+        localStorage.setItem('ocr_suffix', '');
+        set_phone_number();
+      } else if (numbers.length >= 12) {
+        result.textContent = `Special phone number ${numbers}`;
+        prefixInput.value = localStorage.getItem('ocr_prefix') || '';
+        suffixInput.value = localStorage.getItem('ocr_suffix') || '';
+        prefixInput.style.display = '';
+        suffixInput.style.display = 'inline-block';
+        set_phone_number();
+      } else {
+        prefixInput.style.display = 'none';
+        suffixInput.style.display = 'none';
+        result.textContent = `Numbers ${numbers}`;
+        callBtn.style.display = 'none';
+      }
+    }
+    
+    if (textMatch && textMatch.length > 0) {
+      console.log("Extracted text:", text);
+    } 
+    
+    if (numberMatch || textMatch || emailMatch) {
+      optionGrid.style.display = 'grid';
     } else {
-      result.textContent = 'No numbers found';
+      result.textContent = 'No content found';
       optionGrid.style.display = 'none';
     }
   });

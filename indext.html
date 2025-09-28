@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="designer" content="Paellu"> 
+  <title>Auto OCR</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="main-content">
+    <div class="card">
+      <h2>OCR Scanner</h2>
+      <div id="video-container">
+        <video id="video" autoplay playsinline></video>
+        <div id="scan-area"></div>
+      </div>
+      <button class="scan-btn" id="startScanBtn" onclick="capture()">Scan</button>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <div id="output">Detected: <span id="result"></span></div>
+      <div id="option-grid" style="margin-top:10px; grid-template-columns: 1fr; gap: 10px; display: none;">
+        <div style="margin-top:10px; grid-template-columns: 1fr; gap: 10px; display: block ruby;">
+          <input class="entry" id="prefix" placeholder="Prefix" />
+          <input class="entry" id="suffix" placeholder="Suffix" />
+          <button class="scan-btn" id="callBtn">Call</button>
+        </div>
+        <button class="scan-btn" id="emailBtn" style="display: none;">Email</button>
+      </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <script src="scanner.js"></script>
+</body>
+</html>
