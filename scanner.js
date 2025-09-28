@@ -36,7 +36,12 @@ suffixInput.addEventListener('input', () => {
 
 // Access the device camera and stream to video element
 
-navigator.mediaDevices.getUserMedia({ video: true })
+
+navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: { ideal: 'environment' }
+  }
+})
   .then(stream => video.srcObject = stream)
   .catch(err => console.error("Camera access error:", err));
 
